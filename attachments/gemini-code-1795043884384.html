@@ -1,0 +1,275 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="theme-color" content="#171b22">
+<title>Control · Métricas</title>
+<style>
+:root{
+ --bg:#171b22;--panel:#202630;--panel2:#252d38;--line:#343e4c;--text:#edf1f5;
+ --muted:#929eac;--soft:#c5ced8;--accent:#c6a66b;--green:#42bd83;--red:#ed6a6a;
+ --shadow:0 16px 42px #0005;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--text);font-family:Inter,ui-sans-serif,system-ui,-apple-system,"Segoe UI",sans-serif;min-height:100vh}
+button,input{font:inherit}
+.app{width:min(100%,760px);margin:0 auto;min-height:100vh;padding:34px 26px 110px}
+header{display:flex;align-items:center;justify-content:space-between;margin-bottom:34px}
+.brand{display:flex;align-items:center;gap:12px}
+.mark{width:34px;height:34px;border:1px solid #8f7952;border-radius:10px;display:grid;place-items:center;color:var(--accent);font-family:Georgia,serif;font-size:19px}
+.brand-name{font:600 14px Georgia,serif;letter-spacing:1.1px;text-transform:uppercase}
+.brand-sub{font-size:10px;letter-spacing:1.5px;text-transform:uppercase;color:var(--muted);margin-top:3px}
+.date{font-size:11px;color:var(--muted);letter-spacing:.5px}
+.page{display:none;animation:fade .18s ease}.page.active{display:block}
+@keyframes fade{from{opacity:.45;transform:translateY(4px)}to{opacity:1;transform:none}}
+.eyebrow{font-size:10px;color:var(--accent);letter-spacing:2px;text-transform:uppercase;font-weight:700;margin-bottom:9px}
+h1{font:400 31px/1.15 Georgia,serif;margin:0 0 8px;letter-spacing:-.4px}
+.intro{color:var(--muted);font-size:13px;margin:0 0 27px}
+.metric-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.metric{background:linear-gradient(145deg,#242c36,#1e252e);border:1px solid var(--line);border-radius:15px;padding:21px 20px 19px;min-height:176px;position:relative;overflow:hidden}
+.metric:after{content:"";position:absolute;width:110px;height:110px;border:1px solid #ffffff08;border-radius:50%;right:-46px;top:-44px}
+.metric-top{display:flex;justify-content:space-between;align-items:center;gap:8px}
+.metric-label{font-size:10px;letter-spacing:1.6px;color:var(--muted);text-transform:uppercase;font-weight:700}
+.state{font-size:9px;text-transform:uppercase;letter-spacing:1px;font-weight:800;padding:5px 7px;border-radius:4px}
+.state.good{color:var(--green);background:#42bd8317}.state.bad{color:var(--red);background:#ed6a6a17}.state.wait{color:var(--muted);background:#ffffff0a}
+.value{font:400 clamp(34px,6vw,48px)/1 Georgia,serif;margin:24px 0 10px;letter-spacing:-1px;font-variant-numeric:tabular-nums}
+.value.good{color:var(--green)}.value.bad{color:var(--red)}
+.target{font-size:11px;color:var(--muted)}
+.target strong{color:var(--soft);font-weight:500}
+.hintline{margin-top:19px;color:var(--muted);font-size:11px;line-height:1.6}
+.keyhint{display:flex;align-items:center;gap:12px;margin-top:20px;padding:14px 16px;border:1px solid var(--line);border-radius:11px;background:#ffffff04}
+.keycap{border:1px solid #586575;border-bottom-width:2px;border-radius:5px;padding:5px 9px;font-size:11px;color:var(--soft);min-width:30px;text-align:center}
+.keyhint p{margin:0;color:var(--muted);font-size:11px;line-height:1.5}
+.section-head{display:flex;justify-content:space-between;align-items:end;margin-bottom:20px}
+.count{font:24px Georgia,serif;color:var(--accent)}
+.history-wrap{border:1px solid var(--line);border-radius:13px;overflow:hidden;background:var(--panel)}
+table{width:100%;border-collapse:collapse}
+th{font-size:9px;text-transform:uppercase;letter-spacing:1.5px;color:var(--muted);font-weight:700;text-align:left;padding:14px 17px;background:#ffffff04}
+td{padding:14px 17px;border-top:1px solid var(--line);font-size:13px}
+td:first-child{color:var(--muted);width:60px;font-variant-numeric:tabular-nums}
+td:last-child{text-align:right}
+.duration{font:19px Georgia,serif;font-variant-numeric:tabular-nums}
+.result{font-size:10px;letter-spacing:.8px;text-transform:uppercase;color:var(--soft)}
+.result.yes{color:var(--accent)}
+.empty{padding:42px 20px;text-align:center;color:var(--muted);font-size:12px;line-height:1.7}
+.settings-card{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:21px;margin-bottom:14px}
+.settings-card h2{font:20px Georgia,serif;margin:0 0 5px}
+.settings-card>p{font-size:11px;color:var(--muted);margin:0 0 19px}
+.fields{display:grid;grid-template-columns:1fr 1fr;gap:15px}
+.field label{display:block;color:var(--muted);font-size:10px;letter-spacing:.9px;text-transform:uppercase;margin-bottom:8px}
+.field input{width:100%;background:#171d25;border:1px solid var(--line);border-radius:8px;color:var(--text);padding:12px 13px;outline:none;font-size:15px;font-variant-numeric:tabular-nums}
+.field input:focus{border-color:var(--accent);box-shadow:0 0 0 2px #c6a66b18}
+.save{margin-top:18px;background:var(--accent);color:#171b22;border:0;border-radius:7px;padding:11px 17px;font-size:11px;letter-spacing:.7px;text-transform:uppercase;font-weight:800;cursor:pointer}
+.saved{font-size:11px;color:var(--green);margin-left:12px;opacity:0;transition:opacity .2s}.saved.show{opacity:1}
+.note{border-left:2px solid var(--accent);padding:10px 13px;color:var(--muted);font-size:11px;line-height:1.6;margin-top:18px}
+.bottom-nav{position:fixed;bottom:0;left:0;right:0;background:#191e26ed;backdrop-filter:blur(16px);border-top:1px solid var(--line);z-index:5}
+.nav-inner{width:min(100%,760px);margin:auto;display:grid;grid-template-columns:repeat(3,1fr);padding:8px 16px max(8px,env(safe-area-inset-bottom))}
+.nav-btn{border:0;background:transparent;color:#788493;padding:8px 5px 6px;display:flex;flex-direction:column;align-items:center;gap:5px;cursor:pointer;font-size:10px;letter-spacing:.7px}
+.nav-btn svg{width:19px;height:19px;stroke:currentColor;fill:none;stroke-width:1.6}
+.nav-btn.active{color:var(--accent)}
+.overlay{position:fixed;inset:0;background:#080b10b8;display:none;align-items:center;justify-content:center;padding:20px;z-index:10}
+.overlay.open{display:flex}
+.modal{width:min(100%,380px);background:#222a34;border:1px solid #485363;border-radius:15px;padding:23px;box-shadow:var(--shadow)}
+.modal-top{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px}
+.modal h2{font:22px Georgia,serif;margin:0}
+.close{border:0;background:transparent;color:var(--muted);font-size:22px;cursor:pointer}
+.modal p{color:var(--muted);font-size:11px;margin:0 0 18px}
+.duration-input{width:100%;background:#171d25;border:1px solid #596575;border-radius:9px;padding:16px;color:var(--text);font:30px Georgia,serif;letter-spacing:2px;text-align:center;outline:none}
+.duration-input:focus{border-color:var(--accent)}
+.toggle-row{display:flex;justify-content:space-between;align-items:center;margin:16px 0;color:var(--soft);font-size:12px}
+.toggle{border:1px solid var(--line);border-radius:7px;padding:8px 13px;background:#171d25;color:var(--muted);font-size:10px;letter-spacing:1px;cursor:pointer}
+.toggle.on{border-color:var(--accent);color:var(--accent);background:#c6a66b12}
+.add{width:100%;border:0;background:var(--accent);color:#171b22;padding:13px;border-radius:8px;font-size:11px;letter-spacing:1px;text-transform:uppercase;font-weight:800;cursor:pointer}
+.modal-foot{text-align:center;color:var(--muted);font-size:10px;margin-top:12px}
+.toast{position:fixed;bottom:85px;left:50%;transform:translateX(-50%);background:#303a47;border:1px solid #4b5969;color:var(--soft);padding:9px 14px;border-radius:7px;font-size:11px;opacity:0;pointer-events:none;transition:opacity .2s;z-index:20}.toast.show{opacity:1}
+@media(max-width:560px){.app{padding:24px 16px 105px}header{margin-bottom:30px}.metric-grid{grid-template-columns:1fr;gap:11px}.metric{min-height:150px;padding:18px}.value{margin:19px 0 8px;font-size:40px}.fields{grid-template-columns:1fr}.intro{margin-bottom:22px}h1{font-size:29px}}
+</style>
+</head>
+<body>
+<div class="app">
+<header>
+ <div class="brand"><div class="mark">C</div><div><div class="brand-name">Control</div><div class="brand-sub">Call center · Personal</div></div></div>
+ <div class="date" id="date"></div>
+</header>
+
+<section class="page active" id="page-metrics">
+ <div class="eyebrow">Panel de rendimiento</div>
+ <h1>Métricas de hoy</h1>
+ <p class="intro">Seguimiento de tus indicadores durante la jornada.</p>
+ <div class="metric-grid">
+  <article class="metric">
+   <div class="metric-top"><span class="metric-label">Tiempo promedio</span><span class="state wait" id="tpaState">Sin datos</span></div>
+   <div class="value" id="tpaValue">—:—</div>
+   <div class="target">Objetivo del día <strong id="tpaTarget">—:—</strong></div>
+  </article>
+  <article class="metric">
+   <div class="metric-top"><span class="metric-label">Derivaciones</span><span class="state wait" id="derState">Sin datos</span></div>
+   <div class="value" id="derValue">—%</div>
+   <div class="target">Objetivo del día <strong id="derTarget">—%</strong></div>
+  </article>
+ </div>
+ <div class="hintline" id="summary">Todavía no hay llamadas registradas.</div>
+ <div class="keyhint"><span class="keycap">SPACE</span><p>Registrar una llamada. Escribí los cuatro dígitos de duración; usá <b>D</b> si fue derivada y <b>ENTER</b> para guardar. Usá las flechas <b>← / →</b> para cambiar de pestaña.</p></div>
+</section>
+
+<section class="page" id="page-history">
+ <div class="eyebrow">Actividad de la jornada</div>
+ <div class="section-head"><div><h1>Historial</h1><p class="intro" style="margin:7px 0 0">Detalle de llamadas registradas.</p></div><div class="count" id="historyCount">00</div></div>
+ <div class="history-wrap">
+  <table><thead><tr><th>#</th><th>Duración</th><th style="text-align:right">Resultado</th></tr></thead><tbody id="historyRows"></tbody></table>
+  <div class="empty" id="historyEmpty">Todavía no hay llamadas.<br>Los registros aparecerán acá a medida que avances.</div>
+ </div>
+</section>
+
+<section class="page" id="page-settings">
+ <div class="eyebrow">Preferencias</div><h1>Configuración</h1><p class="intro">Definí tus valores de referencia y objetivos.</p>
+ <div class="settings-card">
+  <h2>Valores anteriores</h2><p>Indicadores acumulados hasta el día anterior.</p>
+  <div class="fields">
+   <div class="field"><label for="prevTpa">TPA acumulado</label><input id="prevTpa" inputmode="numeric" placeholder="05:12" maxlength="5"></div>
+   <div class="field"><label for="prevDer">Derivaciones acumuladas (%)</label><input id="prevDer" inputmode="decimal" placeholder="14,5"></div>
+  </div>
+ </div>
+ <div class="settings-card">
+  <h2>Objetivos del día</h2><p>Los indicadores se mostrarán en verde al cumplirlos y en rojo al superarlos.</p>
+  <div class="fields">
+   <div class="field"><label for="goalTpa">TPA objetivo</label><input id="goalTpa" inputmode="numeric" placeholder="05:00" maxlength="5"></div>
+   <div class="field"><label for="goalDer">Derivaciones objetivo (%)</label><input id="goalDer" inputmode="decimal" placeholder="15"></div>
+  </div>
+  <button class="save" id="saveSettings">Guardar configuración</button><span class="saved" id="saved">Guardado</span>
+  <div class="note">Los valores anteriores quedan guardados como referencia. El TPA y el porcentaje mostrados en «Métricas» se calculan con las llamadas que registres hoy.</div>
+ </div>
+</section>
+</div>
+
+<nav class="bottom-nav"><div class="nav-inner">
+ <button class="nav-btn active" data-page="metrics"><svg viewBox="0 0 24 24"><path d="M4 19V5m0 14h17M8 15l4-4 3 2 5-6"/></svg><span>MÉTRICAS</span></button>
+ <button class="nav-btn" data-page="history"><svg viewBox="0 0 24 24"><path d="M4 6h16M4 12h16M4 18h16M2 6h.01M2 12h.01M2 18h.01"/></svg><span>HISTORIAL</span></button>
+ <button class="nav-btn" data-page="settings"><svg viewBox="0 0 24 24"><path d="M12 8.5a3.5 3.5 0 1 0 0 7 3.5 3.5 0 0 0 0-7Z"/><path d="m19.4 15 .1.1 1.1.9-1.2 2.1-1.4-.5a7.8 7.8 0 0 1-1.5.9l-.3 1.5h-2.4l-.3-1.5a7.8 7.8 0 0 1-1.5-.9l-1.4.5-1.2-2.1 1.1-.9a7.2 7.2 0 0 1 0-1.8l-1.1-.9 1.2-2.1 1.4.5a7.8 7.8 0 0 1 1.5-.9l.3-1.5h2.4l.3 1.5a7.8 7.8 0 0 1 1.5.9l1.4-.5 1.2 2.1-1.1.9a7.2 7.2 0 0 1 0 1.8Z" transform="translate(-1 -1)"/></svg><span>CONFIGURACIÓN</span></button>
+</div></nav>
+
+<div class="overlay" id="overlay">
+ <div class="modal">
+  <div class="modal-top"><h2>Nueva llamada</h2><button class="close" id="closeModal" aria-label="Cerrar">×</button></div>
+  <p>Ingresá la duración en minutos y segundos.</p>
+  <input class="duration-input" id="durationInput" inputmode="numeric" autocomplete="off" placeholder="00:00" maxlength="5">
+  <div class="toggle-row"><span>¿Fue derivada?</span><button class="toggle" id="derivedToggle" type="button">D · NO</button></div>
+  <button class="add" id="confirmAdd">Agregar al historial · ENTER</button>
+  <div class="modal-foot">Escribí 4 números · D alterna derivación · Enter confirma · Esc cancela</div>
+ </div>
+</div>
+<div class="toast" id="toast"></div>
+
+<script>
+const KEY='control-callcenter-v2';
+let data={prevTpa:'',prevDer:'',goalTpa:'',goalDer:'',calls:[]};
+let derived=false;
+const $=id=>document.getElementById(id);
+const parseTime = s => {
+  let v = (s || '').trim();
+  const parts = v.split(':');
+  if (parts.length !== 2) return null;
+  let m = Number(parts[0]), x = Number(parts[1]);
+  if (!Number.isInteger(m) || !Number.isInteger(x) || m < 0 || x < 0 || x > 59) return null;
+  return m * 60 + x;
+};
+const fmt=s=>{
+  if(!Number.isFinite(s)) return '—:—';
+  let totalSec = Math.round(s);
+  return String(Math.floor(totalSec/60)).padStart(2,'0')+':'+String(totalSec%60).padStart(2,'0');
+};
+const parsePct=s=>{let n=Number(String(s).replace(',','.'));return Number.isFinite(n)&&n>=0&&n<=100?n:null};
+function persist(){localStorage.setItem(KEY,JSON.stringify(data))}
+function showToast(msg){$('toast').textContent=msg;$('toast').classList.add('show');setTimeout(()=>$('toast').classList.remove('show'),1700)}
+const pages=['metrics','history','settings'];
+function switchPage(name){
+ document.querySelectorAll('.page').forEach(p=>p.classList.toggle('active',p.id==='page-'+name));
+ document.querySelectorAll('.nav-btn').forEach(b=>b.classList.toggle('active',b.dataset.page===name));
+}
+document.querySelectorAll('.nav-btn').forEach(b=>b.addEventListener('click',()=>switchPage(b.dataset.page)));
+function paintMetric(valueEl,stateEl,value,target,lowerIsBetter,unit=''){
+ const val=$(valueEl),st=$(stateEl);
+ if(value===null||target===null){val.textContent='—'+unit;val.className='value';st.textContent='Sin datos';st.className='state wait';return}
+ let ok=lowerIsBetter?value<=target:value<=target;
+ val.textContent=unit==='%'?value.toFixed(1).replace('.',',')+'%':fmt(value);
+ val.className='value '+(ok?'good':'bad');
+ st.textContent=ok?'En objetivo':'Fuera de objetivo';st.className='state '+(ok?'good':'bad');
+}
+function render(){
+ const count=data.calls.length,seconds=data.calls.reduce((a,c)=>a+c.seconds,0),derivedCount=data.calls.filter(c=>c.derived).length;
+ const tpa=count?seconds/count:null,rate=count?derivedCount/count*100:null;
+ const goalT=parseTime(data.goalTpa),goalD=parsePct(data.goalDer);
+ $('tpaTarget').textContent=goalT===null?'—:—':fmt(goalT);
+ $('derTarget').textContent=goalD===null?'—%':goalD.toString().replace('.',',')+'%';
+ paintMetric('tpaValue','tpaState',tpa,goalT,true);
+ paintMetric('derValue','derState',rate,goalD,true,'%');
+ $('summary').textContent=count?`${count} llamadas registradas · ${derivedCount} derivadas · ${count-derivedCount} sin derivar.`:'Todavía no hay llamadas registradas.';
+ $('historyCount').textContent=String(count).padStart(2,'0');
+ $('historyRows').innerHTML='';
+ data.calls.forEach((c,i)=>{const tr=document.createElement('tr');tr.innerHTML=`<td>${String(i+1).padStart(2,'0')}</td><td><span class="duration">${fmt(c.seconds)}</span></td><td><span class="result ${c.derived?'yes':''}">${c.derived?'Derivada':'Normal'}</span></td>`;$('historyRows').appendChild(tr)});
+ $('historyEmpty').style.display=count?'none':'block';
+}
+function openModal(){
+ if(!$('page-metrics').classList.contains('active'))return;
+ derived=false;$('derivedToggle').classList.remove('on');$('derivedToggle').textContent='D · NO';
+ $('durationInput').value='';$('overlay').classList.add('open');setTimeout(()=>$('durationInput').focus(),30);
+}
+function closeModal(){$('overlay').classList.remove('open')}
+function addCall(){
+ const seconds=parseTime($('durationInput').value);
+ if(seconds===null){showToast('Ingresá cuatro dígitos, por ejemplo 0432.');$('durationInput').focus();return}
+ data.calls.push({seconds,derived});persist();render();closeModal();showToast('Llamada agregada.');
+}
+$('durationInput').addEventListener('input',e=>{
+ let digits=e.target.value.replace(/\D/g,'').slice(0,4);
+ e.target.value=digits.length>2?digits.slice(0,2)+':'+digits.slice(2):digits;
+});
+$('derivedToggle').onclick=()=>{derived=!derived;$('derivedToggle').classList.toggle('on',derived);$('derivedToggle').textContent=derived?'D · SÍ':'D · NO';$('durationInput').focus()};
+$('confirmAdd').onclick=addCall;$('closeModal').onclick=closeModal;
+$('overlay').addEventListener('click',e=>{if(e.target===$('overlay'))closeModal()});
+$('saveSettings').onclick=()=>{
+ const pt=$('prevTpa').value.trim(),pd=$('prevDer').value.trim(),gt=$('goalTpa').value.trim(),gd=$('goalDer').value.trim();
+ if((pt&&parseTime(pt)===null)||(gt&&parseTime(gt)===null)){showToast('Revisá el formato de TPA: MM:SS.');return}
+ if((pd&&parsePct(pd)===null)||(gd&&parsePct(gd)===null)){showToast('Los porcentajes deben estar entre 0 y 100.');return}
+ data.prevTpa=pt;data.prevDer=pd;data.goalTpa=gt;data.goalDer=gd;persist();render();
+ $('saved').classList.add('show');setTimeout(()=>$('saved').classList.remove('show'),1800);
+};
+function load(){
+ try{const saved=JSON.parse(localStorage.getItem(KEY));if(saved)data={...data,...saved}}catch(e){}
+ $('prevTpa').value=data.prevTpa;$('prevDer').value=data.prevDer;$('goalTpa').value=data.goalTpa;$('goalDer').value=data.goalDer;
+}
+document.addEventListener('keydown',e=>{
+ const modalOpen=$('overlay').classList.contains('open');
+ if(modalOpen){
+  if(e.key==='Escape'){e.preventDefault();closeModal();return}
+  if(e.key.toLowerCase()==='d'&&document.activeElement!==$('durationInput')){e.preventDefault();$('derivedToggle').click();return}
+  if(e.key==='Enter'){e.preventDefault();addCall();return}
+  if(e.key.toLowerCase()==='d'&&document.activeElement===$('durationInput')){e.preventDefault();$('derivedToggle').click();return}
+  return;
+ }
+ // Navegación con flechas de teclado entre pestañas
+ if(document.activeElement.tagName!=='INPUT'&&document.activeElement.tagName!=='BUTTON'){
+  const activePage = pages.find(p => $('page-'+p).classList.contains('active'));
+  let currentIndex = pages.indexOf(activePage);
+  if(e.key==='ArrowRight'){
+   e.preventDefault();
+   currentIndex = (currentIndex + 1) % pages.length;
+   switchPage(pages[currentIndex]);
+   return;
+  }
+  if(e.key==='ArrowLeft'){
+   e.preventDefault();
+   currentIndex = (currentIndex - 1 + pages.length) % pages.length;
+   switchPage(pages[currentIndex]);
+   return;
+  }
+ }
+ if(!$('page-metrics').classList.contains('active'))return;
+ if(e.code==='Space'&&document.activeElement.tagName!=='INPUT'&&document.activeElement.tagName!=='BUTTON'){e.preventDefault();openModal()}
+});
+$('date').textContent=new Intl.DateTimeFormat('es-AR',{weekday:'short',day:'2-digit',month:'short'}).format(new Date()).toUpperCase();
+load();render();
+</script>
+</body>
+</html>

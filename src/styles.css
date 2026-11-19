@@ -1,0 +1,83 @@
+@import "tailwindcss";
+@import "@fontsource/newsreader/latin-400.css";
+@import "@fontsource/newsreader/latin-500.css";
+@import "@fontsource/newsreader/latin-600.css";
+@import "@fontsource/outfit/latin-400.css";
+@import "@fontsource/outfit/latin-500.css";
+@import "@fontsource/outfit/latin-600.css";
+@import "@fontsource/outfit/latin-700.css";
+
+@theme {
+  --color-bg: #171b22;
+  --color-panel: #202630;
+  --color-elevated: #252d38;
+  --color-ink: #edf1f5;
+  --color-muted: #929eac;
+  --color-soft: #c5ced8;
+  --color-line: #343e4c;
+  --color-accent: #c6a66b;
+  --color-on-accent: #171b22;
+  --color-good: #42bd83;
+  --color-bad: #ed6a6a;
+  --color-scrim: #080b10;
+  --font-sans: "Outfit", ui-sans-serif, system-ui, sans-serif;
+  --font-serif: "Newsreader", Georgia, "Times New Roman", serif;
+  --radius-card: 0.9375rem;
+  --radius-control: 0.5rem;
+  --shadow-modal: 0 16px 42px rgb(0 0 0 / 0.38);
+  --text-label: 0.6875rem;
+  --text-label--line-height: 1.35;
+  --text-micro: 0.625rem;
+  --text-micro--line-height: 1.45;
+  --text-hero: 3rem;
+  --text-hero--line-height: 0.95;
+}
+
+@layer base {
+  html {
+    color-scheme: dark;
+  }
+
+  body {
+    margin: 0;
+    min-height: 100vh;
+    background: var(--color-bg);
+    color: var(--color-ink);
+    font-family: var(--font-sans);
+  }
+
+  button:not(:disabled),
+  [role="button"]:not(:disabled) {
+    cursor: pointer;
+  }
+
+  ::selection {
+    background: color-mix(in srgb, var(--color-accent) 35%, transparent);
+    color: var(--color-ink);
+  }
+}
+
+@keyframes rise {
+  from {
+    opacity: 0.45;
+    transform: translateY(4px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+.rise {
+  animation: rise 180ms ease;
+}
+
+.dock {
+  padding-bottom: max(0.5rem, env(safe-area-inset-bottom));
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .rise {
+    animation: none;
+  }
+}
